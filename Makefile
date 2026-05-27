@@ -1,27 +1,26 @@
 CC = gcc
-CFLAGS = -Wall -Wextra -std=c99 -O2
-AR = ar
-
+CFLAGS = -Wall -Wextra -std=c99 -O2 -Iinclude
 SRC = src/eisenstein_vs_z2.c
-OBJ = $(SRC:.c=.o)
-LIB = libeisenstein_vs_z2.a
-HDR = include/eisenstein_vs_z2.h
+LIB = libeisenstein.a
 
 .PHONY: all lib test clean
 
 all: lib
 
+build:
+	mkdir -p build
+
 lib: $(LIB)
 
-$(LIB): $(OBJ)
-	$(AR) rcs $@ $^
+$(LIB): $(SRC) include/eisenstein_vs_z2.h | build
+	$(CC) $(CFLAGS) -c $(SRC) -o build/eisenstein_vs_z2.o -lm
+	ar rcs $@ build/eisenstein_vs_z2.o
 
-src/%.o: src/%.c $(HDR)
-	$(CC) $(CFLAGS) -Iinclude -c -o $@ $<
+test: test_runner
+	./test_runner
 
-test: $(LIB) tests/test_eisenstein.c $(HDR)
-	$(CC) $(CFLAGS) -Iinclude -o test_eisenstein tests/test_eisenstein.c $(LIB) -lm
-	./test_eisenstein
+test_runner: tests/test_eisenstein.c $(LIB) include/eisenstein_vs_z2.h
+	$(CC) $(CFLAGS) tests/test_eisenstein.c -L. -leisenstein -lm -o test_runner
 
 clean:
-	rm -f src/*.o $(LIB) test_eisenstein
+	rm -f $(LIB) test_runner build/*.o
