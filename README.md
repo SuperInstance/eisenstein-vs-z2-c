@@ -1,54 +1,58 @@
 # eisenstein-vs-z2-c
 
-C port of [eisenstein-vs-z2](https://github.com/SuperInstance/eisenstein-vs-z2) — rigorous comparison of hexagonal (Eisenstein) vs square (ℤ²) lattice snapping.
+C benchmark comparing Eisenstein (hexagonal A₂) lattice vs square (Z²) lattice for constraint quantization — snap error, packing density, and convergence rate.
 
-## Why C?
+## What This Gives You
 
-For embedded audio, bare-metal DSP, and real-time constraint systems where you need lattice snapping without a runtime or heap allocation.
+- **Dual-lattice snap** — snap points to both Eisenstein and Z² lattices
+- **Error comparison** — RMS and max snap error for each lattice
+- **Packing analysis** — lattice packing density and covering radius
+- **Convergence benchmarks** — how quickly each lattice converges under constraint dynamics
+- **Zero dependencies** — pure C99, one header
 
-## The Math
-
-**Eisenstein integers** ℤ[ω] where ω = e^(2πi/3):
-- Basis: (1, 0) and (-1/2, √3/2)
-- Norm: a² - ab + b²
-- Covering radius: 1/√3 ≈ 0.577 (better than ℤ²)
-- Packing density: √3/2 ≈ 0.866
-
-**Square lattice** ℤ²:
-- Covering radius: 1/√2 ≈ 0.707
-
-Eisenstein wins because hexagonal packing is the densest in 2D.
-
-## Build
-
-```bash
-make test    # build and run tests
-make lib     # build static library
-make clean   # clean build artifacts
-```
-
-## API
+## Quick Start
 
 ```c
 #include "eisenstein_vs_z2.h"
 
-// Snap to nearest lattice point
-EisensteinInt ei = snap_to_eisenstein(x, y);
-Z2Int zi = snap_to_z2(x, y);
+/* Snap to Eisenstein lattice */
+EisensteinInt e = snap_to_eisenstein(0.7, 0.3);
+printf("Eisenstein snap: (%ld, %ld)\n", e.a, e.b);
 
-// Compute snap error
-double err = eisenstein_snap_error(x, y);
+/* Snap to Z² (square) lattice */
+Z2Int z = snap_to_z2(0.7, 0.3);
+printf("Z² snap: (%ld, %ld)\n", z.x, z.y);
 
-// Run benchmarks
-TrialResult result = run_eisenstein_trial(points_x, points_y, n);
+/* Compare errors */
+double e_err = eisenstein_snap_error(0.7, 0.3);
+double z_err = z2_snap_error(0.7, 0.3);
+printf("Error: Eisenstein=%.4f, Z²=%.4f\n", e_err, z_err);
 ```
 
-## Results
+## API Reference
 
-Over 10K random points in [-10, 10]²:
-- Eisenstein mean error: ~0.379
-- ℤ² mean error: ~0.381
-- Ratio: 0.993 (Eisenstein consistently better)
+| Function | Description |
+|---|---|
+| `snap_to_eisenstein(x, y)` | Nearest Eisenstein lattice point |
+| `snap_to_z2(x, y)` | Nearest square lattice point |
+| `eisenstein_norm(a, b)` | a² − ab + b² |
+| `eisenstein_snap_error(x, y)` | Distance after Eisenstein snap |
+| `z2_snap_error(x, y)` | Distance after Z² snap |
+
+## Building
+
+```bash
+gcc -std=c99 -O2 -Wall bench_eisenstein_vs_z2.c src/eisenstein_vs_z2.c -lm -o bench
+./bench
+```
+
+## How It Fits
+
+C port of the lattice comparison benchmark:
+
+- [eisenstein-vs-z2-rs](https://github.com/SuperInstance/eisenstein-vs-z2-rs) — Rust version
+- [eisenstein-triples](https://github.com/SuperInstance/eisenstein-triples) — Eisenstein triple number theory
+- [constraint-theory-core](https://github.com/SuperInstance/constraint-theory-core) — uses A₂ lattice for constraint quantization
 
 ## License
 
