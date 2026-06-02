@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -Wall -Wextra -std=c99 -O2 -Iinclude
+CFLAGS = -Wall -Wextra -pedantic -std=c99 -O2 -Iinclude
 SRCS = src/eisenstein_vs_z2.c
 TESTS = tests/test_eisenstein.c
 
